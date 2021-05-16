@@ -1,0 +1,29 @@
+{% extends 'newspaperapp/lrbase.html' %}
+
+{% block title %}
+    Login
+{% endblock %}
+
+{% block body %}
+    <form class="form-signin" method="POST" action="">
+        {% csrf_token %}
+        <div class="text-center mb-4">
+            <h1 class="h3 mb-3 font-weight-normal">Newspaper Login</h1>
+            <p>Online Newspaper Web Application</p>
+        </div>
+
+        <div class="form-label-group">
+            <input type="text" id="inputEmail" name="username" class="form-control" placeholder="Username" required autofocus>
+        </div>
+
+        <div class="form-label-group">
+            <input type="password" id="inputPassword" name="password" class="form-control" placeholder="Password" required>
+        </div>
+
+        <button class="btn btn-lg btn-success btn-block" id="loginbutt" type="submit" value="Login">Sign in</button>
+        <div class="text-center mt-2 ">
+            <a href="{% url 'register' %}"><button type="button" id="regbutton" class="btn btn-outline-success btn-sm">Register</button></a>
+        <div>
+    </form>
+{% endblock %}
+

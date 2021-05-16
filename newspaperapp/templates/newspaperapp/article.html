@@ -1,0 +1,169 @@
+{% extends 'newspaperapp/base.html' %}
+
+    {% block title %}
+        Article
+    {% endblock %}
+
+    {% block body %}
+    <nav class="navbar navbar-expand-lg navbar-dark bg-dark">
+        <a class="navbar-brand" href="{% url 'index' %}">Newspaper</a>
+        <button class="navbar-toggler" type="button" data-toggle="collapse" data-target="#navbarSupportedContent" aria-controls="navbarSupportedContent" aria-expanded="false" aria-label="Toggle navigation">
+            <span class="navbar-toggler-icon"></span>
+        </button>
+
+        <div class="collapse navbar-collapse" id="navbarSupportedContent">
+            <ul class="navbar-nav mr-auto">
+                <li class="nav-item">
+                    <a class="nav-link" href="{% url 'index' %}">Home <span class="sr-only">(current)</span></a>
+                </li>
+                <li class="nav-item">
+                    <a class="nav-link" href="{% url 'viewcategories' %}">Categories<span class="sr-only">(current)</span></a>
+                </li>
+                <li class="nav-item">
+                    <a class="nav-link" href="{% url 'showLikes' %}">Likes<span class="sr-only">(current)</span></a>
+                </li>
+                <li class="nav-item">
+                    <a class="nav-link" href="{% url 'logout' %}">Log Out</a>
+                </li>
+            </ul>
+            <div class="my-2 my-lg-0">
+                {% if user.userinfo.pic %}
+                <a href="{% url 'viewuserinfo' %}"><img src="{{ user.userinfo.pic.url }}" width="32" height="32" class="rounded-circle" alt="Profile Picture"></a>
+                {% else %}
+                <a href="{% url 'viewuserinfo' %}"><img src="/media/images/default.jpg" width="32" height="32" class="rounded-circle" alt="Profile Picture"/></a>
+                {% endif %}
+            </div>
+        </div>
+    </nav>
+
+    <div class="jumbotron">
+        <div class="container">
+            <div class="col-12">
+                <h1 class="display-4">{{article.headline}}</h1>
+                <p class="lead">{{article.category}}</p>
+            </div>
+        </div>
+        </div>
+
+    <div class="container">
+        <div class="row mt-1 my-3">
+            <div class="col-8">
+                <div class="card ">
+                    <div class="card-body">
+                        <h5 class="card-title">{{article.date}}</h5>
+                        <p class="card-text">{{article.text}}</p>
+                    </div>
+                </div>
+                <div class="card my-3">
+                    <div class="card-header">
+                        <h5 class="m-auto">Comments</h5>
+                    </div>
+                    <div class="card-body">
+                        <form class="postComment" method="POST">
+                            {% csrf_token %}
+                            {% for f in form %}
+                                <div class="form-group">
+                                    {{f.label_tag}}
+                                    {{f}}
+                                </div>
+                            {% endfor %}
+                            <button type="button" class="btn btn-success" id="submitComment" data-id="{{article.id}}">Comment</button>
+                        </form>
+                    </div>
+                    <hr class="mx-4">
+                    <div class="commentlist mx-4">
+                    {% for comment in article.comments.all %}
+                        <div class="comments card mb-1" id="comment{{comment.id}}" data-id="{{comment.id}}">
+                            <div class="card-body">
+                                <h6 class="card-subtitle mb-2 text-muted">{{comment.commenter.username}}</h6>
+                                <p class="card-text body">{{comment.body}}</p>
+                                <div>
+                                    <button data-id="{{comment.id}}" class="btn btn-info commentbutton">Reply</button>
+                                    {% if comment.commenter == user %}
+                                        <button data-id="{{comment.id}}" class="btn btn-warning editbutton">Edit</button>
+                                        <button data-id="{{comment.id}}" class="btn btn-danger deletebutton">Delete</button>
+                                    {% endif %}
+                                </div>
+                                <div style="display: none;" class="mx-4" id="subcommentform{{comment.id}}">
+                                    <hr>
+                                    <form class="postSubComment" id="postSubComment{{comment.id}}" method="POST">
+                                        <div class="form-group">
+                                            <label for="subcomment">Reply:</label>
+                                            <textarea class="form-control" id="subcomment" name="subcomment" rows="3"></textarea>
+                                        </div>
+                                        <button type="button" class="btn btn-info" id="submitSubComment" data-id="{{comment.id}}">Reply</button>
+                                    </form>
+                                </div>
+                                <div style="display: none;" class="mx-4" id="editcommentform{{comment.id}}">
+                                    <hr>
+                                    <form class="postEditComment" id="postEditComment{{comment.id}}" method="POST">
+                                        <div class="form-group">
+                                            <label for="editcomment">Edit:</label>
+                                            <textarea class="form-control" id="editcomment" name="editcomment" rows="3">{{comment.body}}</textarea>
+                                        </div>
+                                        <button type="button" class="btn btn-warning" id="submitEdit" data-id="{{comment.id}}">Edit</button>
+                                    </form>
+                                </div>
+                                <div id="subcomments{{comment.id}}">
+                                    {% if comment.subcomments.all %}
+                                        <hr>
+                                    {% endif %}
+                                    {% for subcomment in comment.subcomments.all %}
+                                        <div class="card subcomment ml-5 mb-1" id="subcomment{{subcomment.id}}" data-id="{{subcomment.id}}">
+                                            <div class="card-body">
+                                                <h6 class="card-subtitle mb-2 text-muted">{{subcomment.subcommenter.username}}</h6>
+                                                <p class="card-text">{{subcomment.body}}</p>
+                                                {% if subcomment.subcommenter == user %}
+                                                    <button type="button" class="btn btn-danger deletesubbutton" data-id="{{subcomment.id}}">Delete</button>
+                                                {% endif %}
+                                            </div>
+                                        </div>
+                                    {% endfor %}
+                                </div>
+                            </div>
+                        </div>
+                    {% endfor %}
+                    </div>
+                </div>
+            </div>
+
+            <div class="col-4">
+                <div class="card">
+                    <div class="card-header">
+                        <h5 class="m-auto">Like What You See?</h5>
+                    </div>
+                    <div class="card-body">
+                        <h5 class="card-title">Like this Article</h5>
+                        <p class="card-text">Liking this article will easily be able to get back to this article through the liked articles page</p>
+                        <div class="likebuttons">
+                            {% csrf_token %}
+                            {% if user in article.likes.all %}
+                                <button type="button" class="btn btn-success dislike" id= "dislike{{article.id}}" data-id="{{article.id}}">Dislike</button>
+                            {% else %}
+                                    <button type="button" class="btn btn-outline-success like" id= "like{{article.id}}" data-id="{{article.id}}">Like</button>
+                            {% endif %} 
+                        </div>
+                    </div>
+                </div>
+
+                <div class="card my-3">
+                    <div class="card-header">
+                        <h5 class="m-auto">Like What You See?</h5>
+                    </div>
+                    <div class="card-body">
+                        <h5 class="card-title">Follow {{article.category}}</h5>
+                        <p class="card-text">Following {{category.category}} will ensure that you see all the articles posted to this category right on your dashboard.</p>
+                        
+                        <div class="followbuttons">
+                            {% if article.category in user.userinfo.favourites.all %}
+                                <button type="button" class="btn btn-info unfollow" id="unfollow{{article.category.id}}" data-id="{{article.category.id}}">Unfollow</button>
+                            {% else %}
+                                <button type="button" class="btn btn-outline-info follow" id="follow{{article.category.id}}" data-id="{{article.category.id}}">Follow</button>
+                            {% endif %}
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    {% endblock %}

@@ -1,0 +1,109 @@
+{% extends 'newspaperapp/base.html' %}
+
+    {% block title %}
+        Profile
+    {% endblock %}
+
+    {% block body %}
+    <nav class="navbar navbar-expand-lg navbar-dark bg-dark">
+        <a class="navbar-brand" href="{% url 'index' %}">Newspaper</a>
+        <button class="navbar-toggler" type="button" data-toggle="collapse" data-target="#navbarSupportedContent" aria-controls="navbarSupportedContent" aria-expanded="false" aria-label="Toggle navigation">
+            <span class="navbar-toggler-icon"></span>
+        </button>
+        <div class="collapse navbar-collapse" id="navbarSupportedContent">
+            <ul class="navbar-nav mr-auto">
+                <li class="nav-item">
+                    <a class="nav-link" href="{% url 'index' %}">Home <span class="sr-only">(current)</span></a>
+                </li>
+                <li class="nav-item">
+                    <a class="nav-link" href="{% url 'viewcategories' %}">Categories<span class="sr-only">(current)</span></a>
+                </li>
+                <li class="nav-item">
+                    <a class="nav-link" href="{% url 'showLikes' %}">Likes<span class="sr-only">(current)</span></a>
+                </li>
+                <li class="nav-item">
+                    <a class="nav-link" href="{% url 'logout' %}">Log Out</a>
+                </li>
+            </ul>
+            <div class="my-2 my-lg-0">
+                {% if user.userinfo.pic %}
+                <a href="{% url 'viewuserinfo' %}"><img src="{{ user.userinfo.pic.url }}" width="32" height="32" class="rounded-circle" alt="Profile Picture"></a>
+                {% else %}
+                <a href="{% url 'viewuserinfo' %}"><img src="/media/images/default.jpg" width="32" height="32" class="rounded-circle" alt="Profile Picture"/></a>
+                {% endif %}
+            </div>
+        </div>
+    </nav>
+
+    {% if user.is_authenticated %}
+        <div class="jumbotron">
+            <div class="container">
+                <div class="row">
+                    <div class="col-6">
+                        <h1 class="display-4">{{ user.username }}'s Profile</h1>
+                        <p class="lead">Please Add A Profile Picture & Follow News Categories That Interest You</p>
+                        <hr>
+                        <div class="d-flex">
+                            <h4 style="flex: 1;">Email:</h4>
+                            <h4>{{ user.email }}</h4>
+                        </div>
+                        <div class="d-flex">
+                            <h4 style="flex: 1;" >Date of Birth:</h4>
+                            <h4>{{ user.userinfo.dob }}</h4>
+                        </div>
+                    </div>
+                    <div class="col-6">
+                        {% if user.userinfo.pic %}
+                        <div class="profilepicture">
+                            <img src="{{ user.userinfo.pic.url }}" width="240" height="240" class="rounded-circle">
+                            <form method="POST" action="{% url 'deleteProfilePic' %}">
+                                {% csrf_token %}
+                                <input type='Submit' class="btn btn-danger mt-3" value="Delete">
+                            </form>
+                        </div>
+                        {% else %}
+                            <div class="profilepicture">
+                                <img src="/media/images/default.jpg" width="240" height="240" class="rounded-circle"/>
+                            </div>
+                        {% endif %}
+                        <form method="POST" enctype="multipart/form-data" action="{% url 'addProfilePic' %}">
+                            {% csrf_token %}
+                            <div class="alert alert-dark imageentry my-2 d-flex" role="alert">{{imageForm.as_p}} <input type='Submit' class="btn btn-success" value="Save">
+                                {% if user.userinfo.pic %}
+                                {% endif %}
+                            </div>
+                        </form>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        
+    <div class="container">
+        <div class="row mt-1">
+            <div class="col-12">
+                <div class="card my-3">
+                    <div class="card-header">
+                        <h5 class="m-auto">Categories</h5>
+                    </div>
+                    <div class="list-group list-group-flush">
+                        {% for category in categories %}
+                            <div class="list-group-item d-flex">
+                                <p class="m-auto" style="flex: 1;">{{category.name}}</p>
+                                <a href="{% url 'category' category.id %}"><button type="button" class="btn btn-outline-dark">View</button></a>
+                                <div class="followbuttons">
+                                    {% if category in user.userinfo.favourites.all %}
+                                        <button type="button" class="btn btn-info ml-2 unfollow" id="unfollow{{category.id}}" data-id="{{category.id}}">Unfollow</button>
+                                    {% else %}
+                                        <button type="button" class="btn btn-outline-info ml-2 follow" id="follow{{category.id}}" data-id="{{category.id}}">Follow</button>
+                                    {% endif %}
+                                    </div>
+                            </div>
+                        {% endfor %}
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    {% endif %}
+    {% endblock %}

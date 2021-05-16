@@ -1,0 +1,94 @@
+{% extends 'newspaperapp/base.html' %}
+
+    {% block title %}
+        News Catagory
+    {% endblock %}
+
+    {% block body %}
+    <nav class="navbar navbar-expand-lg navbar-dark bg-dark">
+        <a class="navbar-brand" href="{% url 'index' %}">Newspaper</a>
+        <button class="navbar-toggler" type="button" data-toggle="collapse" data-target="#navbarSupportedContent" aria-controls="navbarSupportedContent" aria-expanded="false" aria-label="Toggle navigation">
+            <span class="navbar-toggler-icon"></span>
+        </button>
+
+        <div class="collapse navbar-collapse" id="navbarSupportedContent">
+            <ul class="navbar-nav mr-auto">
+                <li class="nav-item">
+                    <a class="nav-link" href="{% url 'index' %}">Home <span class="sr-only">(current)</span></a>
+                </li>
+                <li class="nav-item">
+                    <a class="nav-link" href="{% url 'viewcategories' %}">Categories<span class="sr-only">(current)</span></a>
+                </li>
+                <li class="nav-item">
+                    <a class="nav-link" href="{% url 'showLikes' %}">Likes<span class="sr-only">(current)</span></a>
+                </li>
+                <li class="nav-item">
+                    <a class="nav-link" href="{% url 'logout' %}">Log Out</a>
+                </li>
+            </ul>
+            <div class="my-2 my-lg-0">
+                {% if user.userinfo.pic %}
+                <a href="{% url 'viewuserinfo' %}"><img src="{{ user.userinfo.pic.url }}" width="32" height="32" class="rounded-circle" alt="Profile Picture"></a>
+                {% else %}
+                <a href="{% url 'viewuserinfo' %}"><img src="/media/images/default.jpg" width="32" height="32" class="rounded-circle" alt="Profile Picture"/></a>
+                {% endif %}                </div>
+        </div>
+    </nav>
+
+    <div class="jumbotron">
+        <div class="container">
+            <div class="col-12">
+                <h1 class="display-4">{{category.name}}</h1>
+                <p class="lead">Curated List of Articles for the {{category.name}} Category</p>
+                <hr class="my-4">
+                <p>Like what you see? Don't forget to follow {{category.name}} to see this category in your dashboard</p>
+            </div>
+        </div>
+        </div>
+
+    <div class="container">
+        <div class="row">
+            <div class="col-8">
+                <div class=" alert alert-dark">
+                    <h5 class="m-auto">{{category.name}}</h5>
+                </div>
+                {% for newsArticle in category.newsArticles.all %}
+                    <div class="card mt-1">
+                        <div class="card-body">
+                            <h5 class="card-title">{{newsArticle.headline}}</h5>
+                            <h6 class="card-subtitle mb-2 text-muted">{{newsArticle.date}}</h6>
+                            <p class="card-text articleText">{{newsArticle.text}}</p>
+                            <div class="likebuttons">
+                                <a href="{% url 'viewArticle' newsArticle.id %}" class="btn btn-outline-info">Read More</a>
+                                {% if user in newsArticle.likes.all %}
+                                    <button type="button" class="btn btn-success dislike" id= "dislike{{newsArticle.id}}" data-id="{{newsArticle.id}}">Dislike</button>
+                                {% else %}
+                                    <button type="button" class="btn btn-outline-success like" id= "like{{newsArticle.id}}" data-id="{{newsArticle.id}}">Like</button>
+                                {% endif %} 
+                            </div>
+                        </div>
+                    </div>
+                {% endfor %}
+            </div>
+            <div class="col-4">
+                <div class="card">
+                    <div class="card-header">
+                        <h5 class="m-auto">Like What You See?</h5>
+                    </div>
+                    <div class="card-body">
+                        <h5 class="card-title">Follow {{category.name}}</h5>
+                        <p class="card-text">Following {{category.name}} will ensure that you see all the articles posted to this category right on your dashboard.</p>
+                        <div class="followbuttons">
+                            {% csrf_token %}
+                            {% if category in user.userinfo.favourites.all %}
+                                <button type="button" class="btn btn-info unfollow" id="unfollow{{category.id}}" data-id="{{category.id}}">Unfollow</button>
+                            {% else %}
+                                <button type="button" class="btn btn-outline-info follow" id="follow{{category.id}}" data-id="{{category.id}}">Follow</button>
+                            {% endif %}
+                        </div>
+                    </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        {% endblock %}
